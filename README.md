@@ -326,7 +326,7 @@ AI-Based-Doppler-Radar-Surveillance-System/
 | Velocity estimation | 🔵 Planned |
 | Servo / pin finalization | 🟡 In Progress |
 | ML dataset | 🟡 In Progress |
-| ML classification | 🟡 In Progress |
+| ML classification | 🔵 Planned |
 | Dedicated heat map | 🔵 Planned |
 | Advanced target tracking | 🔵 Planned |
 
