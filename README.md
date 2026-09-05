@@ -320,13 +320,13 @@ AI-Based-Doppler-Radar-Surveillance-System/
 | Comparator digitization | 🔵 Planned |
 | Digital filtering + FFT + frequency extraction | 🔵 Planned|
 | OLED display | 🔵 Planned |
-| ThingSpeak communication | 🔵 Planned |
-| 36-sector radar dashboard | 🔵 Planned |
-| Real-time dashboard | 🔵 Planned|
+| ThingSpeak communication | 🟡 In Progress  |
+| 36-sector radar dashboard | 🟡 In Progress  |
+| Real-time dashboard | 🟡 In Progress |
 | Velocity estimation | 🔵 Planned |
 | Servo / pin finalization | 🟡 In Progress |
-| ML dataset | 🔵 Planned |
-| ML classification | 🔵 Planned |
+| ML dataset | 🟡 In Progress |
+| ML classification | 🟡 In Progress |
 | Dedicated heat map | 🔵 Planned |
 | Advanced target tracking | 🔵 Planned |
 
