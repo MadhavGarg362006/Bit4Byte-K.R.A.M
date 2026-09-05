@@ -211,6 +211,22 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
  * Multiple Radars - 1 radar for every detection,this will help us in figuring the direction of the object and also will provide us with more accurate results.
 
 
+ ## 📋 Project Status
+
+| Category | Task / Milestone | Status | Details |
+|---|---|:---:|---|
+| **Simulation** | Proteus Circuit Simulation | Completed | 4th-order BPF (70–2000 Hz) & LM311 digitizer validated |
+| **Power Stage** | Custom Dual-Rail LiPo Supply |  Completed | 7805 (+5V) & 7905 (-5V) rails active to remove AC hum |
+| **Hardware** | Breadboard Prototyping | Completed | Real-time oscilloscope verification of HB100 IF signals |
+
+| **Embedded** | Pulse Counting & Velocity Measurement | 🟡 In Progress | GPIO interrupt routines configured for speed calculation |
+| **Embedded** | ADC Continuous Sampling & 256-pt FFT | 🔵 Planned | Spectral analysis and peak tracking on ESP32-S3 |
+| **IoT / Cloud** | ThingSpeak API Telemetry | Completed| 5-second interval multi-field data transmission |
+| **Frontend** | 360° Real-Time Web Dashboard | Completed | HTML5 Canvas 36-sector sweep interface |
+| **Machine Learning** | Micro-Doppler Dataset Collection | Completed | Capturing signal profiles for noise, humans, and vehicles 
+| **Machine Learning** | Model Training & Edge Classification | In Progress | Feature extraction (FFT peaks, ZCR) for TinyML |
+
+
 
 🏁 12. Conclusion
 
