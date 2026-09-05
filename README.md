@@ -218,7 +218,6 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 | **Simulation** | Proteus Circuit Simulation | Completed | 4th-order BPF (70–2000 Hz) & LM311 digitizer validated |
 | **Power Stage** | Custom Dual-Rail LiPo Supply |  Completed | 7805 (+5V) & 7905 (-5V) rails active to remove AC hum |
 | **Hardware** | Breadboard Prototyping | Completed | Real-time oscilloscope verification of HB100 IF signals |
-
 | **Embedded** | Pulse Counting & Velocity Measurement | In Progress | GPIO interrupt routines configured for speed calculation |
 | **Embedded** | ADC Continuous Sampling & 256-pt FFT | Planned | Spectral analysis and peak tracking on ESP32-S3 |
 | **IoT / Cloud** | ThingSpeak API Telemetry | Completed| 5-second interval multi-field data transmission |
