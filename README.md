@@ -1,356 +1,181 @@
-# 360° Doppler Radar — ESP32-S3
+# 🛰️ 360° Smart Doppler Radar Surveillance System — ESP32-S3
 
-> A real-time embedded Doppler radar system built around the HB100 microwave radar sensor, combining analog signal conditioning, comparator-based digitization, embedded FFT/frequency processing, cloud data transmission, and a real-time web dashboard.
+> A real-time radar system using the HB100 microwave sensor and ESP32-S3. It detects motion, calculates speed, filters unwanted electrical noise, sends data to the cloud using ThingSpeak, and displays moving targets on a live 360° web dashboard.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Microcontroller](https://img.shields.io/badge/Board-ESP32--S3-red.svg)](https://www.espressif.com/en/products/socs/esp32-s3)
+[![Sensor](https://img.shields.io/badge/Radar-HB100%20(10.525%20GHz)-blue.svg)](#-5-hardware-specifications)
+[![Cloud](https://img.shields.io/badge/Cloud-ThingSpeak-brightgreen.svg)](#-9-machine-learning--thingspeak-dashboard)
 
 ---
 
-## 📡 Project Overview
+## 📑 1. Table of Contents
 
-This project builds a **360° Doppler radar system** using the **HB100 microwave Doppler radar sensor** (10.525 GHz) and an **ESP32-S3**.
-
-The HB100's raw Doppler output is far too weak and noisy to use directly, so the project implements a full analog front end — amplification, 4th-order active band-pass filtering, and further amplification — before converting the conditioned signal to a digital pulse train using a comparator. The ESP32-S3 handles digital filtering, FFT, and frequency extraction on that signal, drives a local OLED display, and sends processed data over Wi-Fi to **ThingSpeak**, which acts as the cloud/API layer. A custom web dashboard pulls this data and renders it as a real-time 360° radar display.
-
-The longer-term goal is to extend the system toward **ML-based object classification** and richer spatial visualization.
-
-This project is **open source** — see [License](#-license) below.
-
----
-
-## 🎯 Objectives
-
-* Build a working Doppler radar around the HB100
-* Design an analog front end suited to the HB100's weak output
-* Amplify and band-pass filter the signal (target band: 70 Hz – 2000 Hz)
-* Digitize the conditioned signal and process it on the ESP32-S3
-* Detect targets based on signal characteristics
-* Represent detections across a 360° field using multiple sectors
-* Send radar data to the cloud via ThingSpeak
-* Build a real-time web dashboard
-* Eventually classify detected objects using machine learning
-* Eventually add a heat-map visualization
+* [2. Executive Summary](#-2-executive-summary)
+* [3. Problem Statement](#-3-problem-statement)
+* [4. System Architecture](#-4-system-architecture)
+* [5. Hardware Specifications](#-5-hardware-specifications)
+* [6. Circuit Explanation (Proteus Simulation)](#-6-circuit-explanation-proteus-simulation)
+* [7. Hardware Integration & Pin Connections](#-7-hardware-integration--pin-connections)
+* [8. Main Circuit Modules](#-8-main-circuit-modules)
+* [9. Machine Learning & ThingSpeak Dashboard](#-9-machine-learning--thingspeak-dashboard)
+* [10. Real-Life Applications](#-10-real-life-applications)
+* [11. Future Upgrades](#-11-future-upgrades)
+* [12. Conclusion](#-12-conclusion)
+* [13. References](#-13-references)
 
 ---
 
-## 🧠 System Architecture
+## 📌 2. Executive Summary
 
-```text
-                         HB100 RADAR SENSOR
-                                │
-                                ▼
-                       Coupling Capacitor
-                                │
-                                ▼
-                         Analog Gain ×10
-                                │
-                                ▼
-                   4th-Order Active Band-Pass
-                             Filter
-                                │
-                                ▼
-                         High-Gain ×10
-                                │
-                                ▼
-                           Comparator
-                                │
-                                ▼
-                           ESP32-S3
-                                │
-                         ┌──────┴──────┐
-                         │             │
-                         ▼             ▼
-                       OLED       Signal Processing
-                       Display     • Digital Filtering
-                         │          • FFT
-                         │          • Frequency
-                         │            Extraction
-                         │          • Target Detection
-                         │          • ML Classification
-                         │
-                         └──────┬──────┘
-                                │
-                           ESP32 Wi-Fi
-                                │
-                                ▼
-                           ThingSpeak
-                                │
-                                ▼
-                         ThingSpeak API
-                                │
-                                ▼
-                         Web Dashboard
-                                │
-                ┌───────────────┼───────────────┐
-                ▼               ▼               ▼
-             360° Radar      FFT Plot        Heat Map
-                                │
-                                ▼
-                       ML Classification
-```
+This project builds an affordable, real-time radar monitoring system using an **HB100 microwave radar sensor** and an **ESP32-S3** microcontroller.
 
-**Signal-Processing Architecture**
+When an object moves in front of the radar, the sensor creates a tiny electrical signal. Because this raw signal is extremely weak and mixed with noise, we send it through an analog circuit that cleans, filters, and boosts it. An **LM311 chip** then turns this smooth signal into clean digital pulses so the ESP32-S3 can measure its frequency and calculate speed.
 
-The overall analog signal path:
-```text
-HB100 → Coupling → Gain ×10 → 4th-Order Active BPF → Gain ×10 → Comparator → ESP32-S3
-```
-
-The ESP32-S3 then handles digital processing and system-level functions:
-```text
-ESP32-S3 → Digital Filtering → FFT → Frequency Extraction → Detection / ML → OLED + Wi-Fi
-```
-
-The OLED provides local real-time system information, while the Wi-Fi connection sends processed data to ThingSpeak for the web dashboard.
+Target speeds and detection strengths are collected across a **360° area** (divided into 36 angular slices). This data is uploaded to a **ThingSpeak** cloud dashboard over Wi-Fi, where anyone can view moving targets on an interactive, rotating radar screen.
 
 ---
 
-## 🔧 Hardware Signal Chain
+## 🎯 3. Problem Statement
 
-**1. HB100 Doppler Radar Sensor** — 10.525 GHz microwave source/receiver. Motion of a target relative to the sensor produces a Doppler-shifted component in the reflected signal.
+### ⚠️ The Challenge
+Most common motion detectors use PIR (infrared) sensors or optical video cameras:
+* **PIR Sensors:** Only detect heat changes. If the weather is hot or an object does not emit heat, they fail. They also cannot measure how fast an object is moving.
+* **Raw Radar Problem:** Microwave sensors like the HB100 solve these issues, but their raw signals are tiny (microvolts) and pick up electrical hum from power lines (50 Hz noise).
 
-**2. AC Coupling** — removes the DC offset so only the Doppler component is processed downstream.
+### 💼 Commercial Impact
+Airports, warehouses, farms, and smart homes need security systems that do not trigger false alarms due to weather or heat. Buying commercial radar or laser scanners (LiDAR) is far too expensive for ordinary projects or small businesses.
 
-**3. First Gain Stage — ×10** — brings the weak radar signal up to a level usable by the filter stage.
-
-**4. 4th-Order Active Band-Pass Filter** — passes 70 Hz – 2000 Hz, the target range for the Doppler frequencies of interest, and rejects out-of-band noise before the second gain stage amplifies further.
-
-**5. Second Gain Stage — ×100** — brings the filtered signal up to a level suitable for clean digitization.
-
-**6. Comparator (LM311)** — converts the conditioned analog waveform into a clean digital pulse train, referenced against a threshold, for the ESP32 to process.
-
-### Op-amps / ICs used
-* TL072CP (dual op-amp) × 2 → 4 op-amp stages
-* LM311 (comparator) × 1 → digitization stage
-
-### Passive component pool
-Resistors and capacitors used across the gain/filter stages, mixed in different combinations per stage:
-
-* Capacitors: 1 µF, 10 µF, 3.3 nF, 10 nF, 4.7 nF, 0.1 µF
-* Resistors: 100 Ω, 330 Ω, 220 Ω, 1 kΩ, 4.7 kΩ, 10k ,68k
-
-*(Full per-stage BOM with exact values per filter section — TBD,)*
+### 🎯 Project Objective
+* Build an analog booster and filter circuit to clean the radar signal without buying expensive gear.
+* Calculate moving target speeds accurately with less than 5% error.
+* Map incoming movement across 36 directions (360° circle).
+* Send real-time data to a cloud dashboard (ThingSpeak) and classify objects with Machine Learning.
 
 ---
 
-## 🧮 Embedded Digital Processing
+## 🏗️ 4. System Architecture
 
-```text
-Comparator Pulse Train
+The overall step-by-step path of the signal through the project:
+
+
+  [ Moving Target ] 
+         │
+         ▼ (Reflected radio waves)
+   [ HB100 Radar ] ──► Produces a tiny, weak signal (Microvolts)
          │
          ▼
-   ESP32-S3 GPIO
+[ 4th-Order Bandpass Filter ] ──► Removes noise & boosts signal by up to 1000x
+         │
+         ├───► Path A: Raw Conditioned Wave ──► ESP32-S3 ADC (For FFT & AI)
          │
          ▼
-  Digital Filtering
+ [ LM311 Comparator ] ──► Converts wave into clean ON/OFF digital pulses
          │
          ▼
-        FFT
+   [ ESP32-S3 Board ] ──► Counts pulses to find speed , the intensity , energy , frequency and heat signature
+         │
+         ├───► Local OLED Display (Shows speed & status directly on the board)
+         │
+         ▼ (Sent over Wi-Fi)
+ [ ThingSpeak Cloud ] ──► Stores live radar data
          │
          ▼
-Frequency Extraction
-         │
-         ▼
-Target Detection / ML
-         │
-    ┌────┴────┐
-    ▼         ▼
-  OLED     Wi-Fi → ThingSpeak
-```
+  [ Web Dashboard ] ──► Shows a 360° live green sweeping radar screen
 
----
-
-## 🛰️ 360° Radar Representation
-
-The dashboard divides the radar view into **36 sectors** (360° / 36 = 10° per sector), from Sector 0 (0°) to Sector 35 (350°). Each sector holds an intensity value, which the dashboard uses to determine:
-
-* Detection intensity
-* Strongest sector / angle
-* Number of active sectors
-* Target positions
-
----
-
-## ☁️ ThingSpeak Integration
-
-ThingSpeak is the cloud/data layer between the ESP32 and the dashboard, accessed via the standard ThingSpeak REST API.
-
-**Current fields:**
-```text
-Field 1 → 36-sector intensity data (CSV)
-Field 2 → Average Doppler frequency
-```
-
-**Update interval:** 5 seconds
-
-**Planned future fields:**
-```text
-Field 3 → Velocity
-Field 4 → FFT peak
-Field 5 → Object classification
-Field 6 → ML confidence
-Field 7 → Position / angle
-Field 8 → Detection status
-```
-
----
-
-## 🖥️ Web Dashboard
-
-A custom HTML/CSS/JavaScript dashboard (rendered on `<canvas>`) provides:
-
-* 360° radar display with animated sweep
-* 36 detection sectors
-* Signal-intensity visualization
-* Maximum signal intensity
-* Average Doppler frequency
-* Strongest detection angle
-* Active-sector count
-* Detected-sector list
-* ThingSpeak connection status
-* Real-time updates (5s interval)
-
-The dashboard is designed to be extended rather than replaced as new fields (velocity, classification, etc.) come online.
-
----
-
-## 🔌 ESP32-S3 Pin Reference
-
-```cpp
-#define SIGNAL_PIN 4   // Comparator output → ESP32 GPIO
-#define OLED_SDA   8
-#define OLED_SCL   9
-// Servo / additional pins: TBD — placeholders, to be finalized
-```
-
----
-
-## 🤖 Machine Learning — Planned
-
-```text
-Digitized Signal → Feature Extraction (incl. FFT) → ML Model → Object Classification
-```
-
-Classes will be defined from measured radar signatures rather than assumed in advance.
-
----
-
-## 🔥 Heat Map — Planned
-
-Will combine sector, signal intensity, Doppler frequency, and detection history over time to show how the radar field changes, not just instantaneous detection.
-
----
-
-## 🧪 Development Approach — Phased
-
-| Phase | Focus |
-|---|---|
-| Software |
-|---|---|
-| 1 | Simulating Circuit as planned |
-| 2 | Acquiring component libraries in software Proteus/KiCAD |
-| 3 | Testing theoretical values on DSO |
-| Hardware |
-|---|---|
-| 1 | Radar signal acquisition + amplification |
-| 2 | Analog conditioning (×10 → 4th-order BPF → ×10) |
-| 3 | Comparator digitization + embedded digital filtering / FFT / frequency extraction |
-| 4 | OLED local display + ThingSpeak + 36-sector web dashboard |
-| 5 | ML feature extraction + classification |
-| 6 | Heat map + advanced target tracking |
-
----
-
-## 📁 Repository Structure
-
-```text
-AI-Based-Doppler-Radar-Surveillance-System/
-│
-├── ESP32/
-│   └── doppler_radar.ino
-│
-├── Dashboard/
-│   ├── index.html
-│   ├── style.css
-│   └── script.js
-│
-├── ML/
-│   ├── dataset/
-│   ├── training/
-│   └── model/
-│
-├── Hardware/
-│   ├── schematic/
-│   ├── circuit-diagram/
-│   └── PCB/
-│
-├── Documentation/
-│
-├── Images/
-│
-├── LICENSE
-│
-└── README.md
-```
-
----
-
-## 🛠️ Technologies & Components
-
-**Hardware:** HB100 (10.525 GHz), ESP32-S3, TL072CP ×2, LM311 comparator, 4th-order active band-pass filter, analog gain stages, OLED display, supporting passives
-
-**Embedded:** C/C++, ESP32-S3, digital filtering, FFT, frequency extraction, Wi-Fi
-
-**Signal Processing:** Analog amplification, 4th-order active band-pass filtering, comparator-based digitization, embedded FFT, frequency-domain peak detection
-
-**Cloud & Dashboard:** ThingSpeak, ThingSpeak REST API, HTML, CSS, JavaScript, HTML Canvas
-
-**Machine Learning (planned):** Dataset generation, feature extraction, model training, object classification
-
----
-
-## 🚧 Current Status
-
-| Component | Status |
-|---|---|
-| Circuit Simulation |  ✅ Done | 🟡 refining |
-| HB100 radar sensing | 🔵 Planned |
-| Analog amplification (×10 / ×100) | 🔵 Planned|
-| 4th-order active band-pass filter | 🔵 Planned |
-| Comparator digitization | 🔵 Planned |
-| Digital filtering + FFT + frequency extraction | 🔵 Planned|
-| OLED display | 🔵 Planned |
-| ThingSpeak communication | 🟡 In Progress  |
-| 36-sector radar dashboard | 🟡 In Progress  |
-| Real-time dashboard | 🟡 In Progress |
-| Velocity estimation | 🔵 Planned |
-| Servo / pin finalization | 🟡 In Progress |
-| ML dataset | 🟡 In Progress |
-| ML classification | 🔵 Planned |
-| Dedicated heat map | 🔵 Planned |
-| Advanced target tracking | 🔵 Planned |
-
----
-
-<h2>📸 Project Images</h2>
+⚙️ 5. Hardware Specifications
+| Component | Part Name | Role in the Project |
+|---|---|---|
+| Radar Sensor | HB100 (10.525 GHz) | Transmits microwave signals and senses returning movement |
+| Op-Amp ICs | TL072CP (x2) | Low-noise amplifiers that boost weak signals and cut noise |
+| Comparator IC | LM311 (x1 1) | Converts smooth analog waves into digital square pulses |
+| Microcontroller | ESP32-S3 | Dual-core brain that counts pulses, runs math, and handles Wi-Fi |
+| Custom made LiPo Power Supply | 5V DC Regulator | Gives steady, clean electrical power without ripples |
 
 
 
-## 📌 Why This Project?
 
-The goal isn't just to detect motion with an HB100 — it's to work through the full pipeline from a raw microwave Doppler signal to meaningful information:
+🧰 Common Parts Used (Resistors & Capacitors):
 
-**Sensor → Analog Electronics → Comparator Digitization → Embedded FFT/Frequency Extraction → Cloud Communication → Visualization → (Planned: ML Classification)**
+ * Capacitors: 1 µF, 10 µF, 0.1 µF, 3.3 nF, 4.7 nF, 10 nF (used for blocking DC voltage and tuning the filter).
+ * Resistors: 100 Ω, 220 Ω, 330 Ω, 1 kΩ, 4.7 kΩ, 10 kΩ, 68 kΩ (used for setting amplification levels).
+🔌 6. Circuit Explanation (Proteus Simulation)
 
-This combines embedded systems, analog electronics, signal processing, IoT, and data visualization — with machine learning as the next stage.
 
----
+Before building the physical board, the circuit was designed and tested in Proteus to ensure clean signal output:
+ HB100 Output ──► [DC Blocker] ──► [Stage 1: Boost] ──► [Stage 2: Filter] ──► [Stage 3: LM311] ──► ESP32-S3
 
-## 📄 License
-
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details. You're free to use, modify, and distribute this project, including commercially, as long as the original copyright and license notice are included.
-
----
-
-## ⚠️ Note
- This repo will be updated as those stages are built.
+ * DC Blocking Capacitor (1 µF):
+   * The HB100 output rides on a steady direct current (DC) voltage. This capacitor strips that steady voltage away and lets only the moving movement wave pass through.
+ * First Gain Stage (10× Boost):
+   * The first op-amp on the TL072 chip boosts the microvolt-level signal by 10 times so the filter can handle it cleanly.
+ * 4th-Order Bandpass Filter (70 Hz – 2000 Hz):
+   * Cuts out slow baseline drift below 70 Hz (like room vibration or 50 Hz wall power hum).
+   * Cuts out fast noise above 2000 Hz (like radio interference).
+ * Second Gain Stage (10× to 100× Boost):
+   * Further amplifies the filtered wave to make it large enough (0 – 3.3V) for both the analog pin and the comparator.
+ * LM311 Comparator Digitizer:
+   * Acts as an electronic switch. Whenever the analog wave crosses a set center line, it flips between 0V and 3.3V, turning the smooth sine wave into clean square pulses.
+🪛 7. Hardware Integration & Pin Connections
+| From (Component) | Pin Name | To (Component) | Pin Name | What it Does |
+|---|---|---|---|---|
+| Power Supply | +5V Rail | HB100, TL072, LM311, ESP32 | VCC / 5V Pins | Powers all chips |
+| Power Supply | Ground | All Components | GND Pins | Common ground return |
+| HB100 Radar | IF Pin | Analog Filter Circuit | Input Capacitor | Sends the raw movement signal |
+| Filter Output | Op-Amp Output | ESP32-S3 | GPIO 1 (ADC Pin) | Reads smooth wave for AI / FFT |
+| LM311 Chip | Pin 7 (Output) | ESP32-S3 | GPIO 4 (Pulse Pin) | Reads digital pulses to count speed |
+| ESP32-S3 | GPIO 8 (SDA) | OLED Display | SDA Pin | Sends display data |
+| ESP32-S3 | GPIO 9 (SCL) | OLED Display | SCL Pin | Sends display timing clock |
+🧩 8. Main Circuit Modules
+📡 1. HB100 Radar Sensor
+ * Sends out invisible microwave radio signals at 10.525 GHz.
+ * When an object moves, the reflected signal changes pitch slightly (the Doppler Effect).
+ * The sensor mixes the outgoing and incoming signals and gives us the difference frequency:
+   * 1 km/h speed \approx 19.49\text{ Hz} signal
+   * Walking human (3 – 5 km/h) \approx 60 - 100\text{ Hz}
+   * Moving car (30 – 60 km/h) \approx 600 - 1200\text{ Hz}
+🎛️ 2. 4th-Order Bandpass Filter (BPF)
+ * Made using two low-noise TL072 operational amplifier chips.
+ * Keeps only frequencies between 70 Hz and 2000 Hz, matching the speeds of humans and vehicles while blocking out all other interference.
+ * A "4th-order" filter has steep rejection walls, blocking unwanted noise much more effectively than a standard 1st- or 2nd-order filter.
+⚡ 3. LM311 Comparator
+ * Converts the analog wave into clean square pulses for the ESP32-S3.
+ * Uses built-in hysteresis (a small buffer zone around the switching threshold). This prevents the switch from chattering or double-triggering on tiny noise spikes.
+📊 9. Machine Learning & ThingSpeak Dashboard
+🤖 Machine Learning Approach (Object Classification)
+Instead of just measuring speed, the ESP32-S3 analyzes signal shapes to tell what caused the movement:
+ * The Process:
+   * The ESP32 takes 256 voltage samples from the analog pin.
+   * It performs an FFT (Fast Fourier Transform), which breaks the wave down into its individual frequency components.
+   * It extracts 3 key numbers: peak frequency, frequency spread, and energy.
+ * Classification Targets:
+   * Class 0 (Background Noise): Weak, random electrical buzz \to Ignored.
+   * Class 1 (Walking Human): Uneven wave caused by swinging arms and legs.
+   * Class 2 (Vehicle / Metal Object): Strong, clean, uniform wave.
+☁️ ThingSpeak Cloud Integration
+The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 5 seconds:
+ * Field 1: 36-sector sweep strengths (all angles around the room).
+ * Field 2: Measured Doppler frequency (Hz).
+ * Field 3: Calculated speed (km/h).
+ * Field 4: Target classification (Human, Vehicle, or Noise).
+🖥️ 360° Live Web Dashboard
+ * Built with simple HTML5, CSS, and JavaScript.
+ * Features a rotating green radar beam divided into 36 sectors (10° each).
+ * Lights up sectors brighter where stronger movement is detected, giving security guards an instant view of target directions.
+🌍 10. Real-Life Applications
+ * All-Weather Perimeter Security: Works through dense fog, rain, snow, and total darkness where standard security cameras fail.
+ * Privacy-Friendly Smart Buildings: Detects if a person is in a room or if someone has fallen without placing invasive cameras in private areas.
+ * Low-Cost Road Speed Checks: Automatically detects speeding vehicles in neighborhood zones or school areas.
+ * Industrial Safety Zones: Sets an invisible radar safety boundary around hazardous factory machines to shut them down if a worker walks too close.
+🚀 11. Future Upgrades
+ * Direction Detection (Coming vs. Going): Use an I/Q radar sensor to determine whether an object is moving closer or farther away.
+ * Distance Measurement: Upgrade to an FMCW-capable radar module to report both target distance and speed together.
+ * Battery Power Optimization: Program the ESP32-S3 to sleep and only wake up when the LM311 detects movement, saving power for long-term battery setups.
+🏁 12. Conclusion
+This project builds an end-to-end radar detection system on a student-friendly budget. By combining the HB100 sensor with a custom 4th-order filter, an LM311 digitizer, an ESP32-S3, and ThingSpeak cloud telemetry, we achieved reliable speed measurement, noise rejection, and live 360° tracking without expensive enterprise radar hardware.
+📚 13. References
+ * HB100 Microwave Motion Sensor Application Note, Agilent Technologies.
+ * Introduction to Radar Systems, Merrill Skolnik.
+ * LM311 Voltage Comparator Datasheet, Texas Instruments.
+ * TL072 Low-Noise JFET Op-Amp Datasheet, Texas Instruments.
+ * ESP32-S3 Technical Reference Manual, Espressif Systems.
