@@ -1,4 +1,4 @@
-# 🛰️ 360° Smart Doppler Radar Surveillance System — ESP32-S3
+# Kinematic Radar & Activity Monitor (K.R.A.M)
 
 > A real-time radar system using the HB100 microwave sensor and ESP32-S3. It detects motion, calculates speed, filters unwanted electrical noise, sends data to the cloud using ThingSpeak, and displays moving targets on a live 360° web dashboard.
 
@@ -10,21 +10,18 @@
 ---
 
 ## 📑 1. Table of Contents
-
-* [2. Executive Summary](#-2-executive-summary)
-* [3. Problem Statement](#-3-problem-statement)
-* [4. System Architecture](#-4-system-architecture)
-* [5. Hardware Specifications](#-5-hardware-specifications)
-* [6. Circuit Explanation (Proteus Simulation)](#-6-circuit-explanation-proteus-simulation)
-* [7. Hardware Integration & Pin Connections](#-7-hardware-integration--pin-connections)
-* [8. Main Circuit Modules](#-8-main-circuit-modules)
-* [9. Machine Learning & ThingSpeak Dashboard](#-9-machine-learning--thingspeak-dashboard)
-* [10. Real-Life Applications](#-10-real-life-applications)
-* [11. Future Upgrades](#-11-future-upgrades)
-* [12. Conclusion](#-12-conclusion)
-* [13. References](#-13-references)
-
----
+* [2. Executive Summary](#2-executive-summary)
+* [3. Problem Statement](#3-problem-statement)
+* [4. System Architecture](#4-system-architecture)
+* [5. Hardware Specifications](#5-hardware-specifications)
+* [6. Circuit Explanation (Proteus Simulation)](#6-circuit-explanation-proteus-simulation)
+* [7. Hardware Integration & Pin Connections](#7-hardware-integration--pin-connections)
+* [8. Main Circuit Modules](#8-main-circuit-modules)
+* [9. Machine Learning & ThingSpeak Dashboard](#9-machine-learning--thingspeak-dashboard)
+* [10. Real-Life Applications](#10-real-life-applications)
+* [11. Future Upgrades](#11-future-upgrades)
+* [12. Conclusion](#12-conclusion)
+* [13. References](#13-references)
 
 📌 2. Executive Summary
 
@@ -54,36 +51,33 @@ Airports, warehouses, farms, and smart homes need security systems that do not t
 
 ---
 
-## 🏗️ 4. System Architecture
+## 🏗️ **4. System Architecture**
 
-The overall step-by-step path of the signal through the project:
+The project works through a clear, sequential pipeline from microwave sensing to live cloud visualization:
 
+* **Step 1: Motion Detection (HB100 Sensor)**  
+  The HB100 microwave transceiver sends out a continuous 10.525 GHz signal. When an object moves within its range, the reflected wave returns with a shifted frequency. The sensor mixes these waves to produce a tiny, microvolt-level movement signal.
 
-  [ Moving Target ] 
-         │
-         ▼ (Reflected radio waves)
-   [ HB100 Radar ] ──► Produces a tiny, weak signal (Microvolts)
-         │
-         ▼
-[ 4th-Order Bandpass Filter ] ──► Removes noise & boosts signal by up to 1000x
-         │
-         ├───► Path A: Raw Conditioned Wave ──► ESP32-S3 ADC (For FFT & AI)
-         │
-         ▼
- [ LM311 Comparator ] ──► Converts wave into clean ON/OFF digital pulses
-         │
-         ▼
-   [ ESP32-S3 Board ] ──► Counts pulses to find speed , the intensity , energy , frequency and heat signature
-         │
-         ├───► Local OLED Display (Shows speed & status directly on the board)
-         │
-         ▼ (Sent over Wi-Fi)
- [ ThingSpeak Cloud ] ──► Stores live radar data
-         │
-         ▼
-  [ Web Dashboard ] ──► Shows a 360° live green sweeping radar screen
+* **Step 2: Signal Conditioning & Noise Rejection (Analog Circuit)**  
+  The raw signal is too weak and noisy for digital processors. It passes through a capacitor that strips away steady DC offset, then goes through low-noise TL072 op-amp stages and a 4th-order bandpass filter (70 Hz to 2000 Hz) to boost the signal up to 1000× while discarding 50 Hz power-line hum.
 
-⚙️ 5. Hardware Specifications
+* **Step 3: Signal Splitting into Dual Processing Paths**  
+  The clean amplified signal splits into two parallel streams:
+  * **Path A (Digital Pulses via LM311):** An LM311 comparator converts the smooth analog wave into sharp digital ON/OFF pulses using a noise-immune hysteresis threshold.
+  * **Path B (Continuous Analog Wave):** The unclipped analog wave goes directly to the ESP32-S3 ADC pin to preserve waveform shape and amplitude.
+
+* **Step 4: Microcontroller Computation (ESP32-S3)**  
+  * **Speed Calculation:** The ESP32-S3 measures pulse intervals from Path A on GPIO 4 to determine velocity instantly.
+  * **Waveform Analysis:** The onboard ADC samples Path B at 4096 Hz and runs a 256-point Fast Fourier Transform (FFT) to extract spectral signatures for object classification.
+  * **Local Readout:** Live speed and detection metrics update continuously on an attached SSD1306 OLED screen.
+
+* **Step 5: Cloud Telemetry (ThingSpeak)**  
+  Every 5 seconds, the ESP32-S3 packages target speed, dominant Doppler frequency, and sector intensity data, uploading the telemetry to ThingSpeak over 2.4 GHz Wi-Fi.
+
+* **Step 6: Real-Time Web Display (360° Surveillance Dashboard)**  
+  A custom browser dashboard fetches the cloud data and maps target intensities across 36 distinct angular sectors (10° slices), rendering an active, rotating sweep on an interactive canvas.
+
+**5. Hardware Specifications**
 | Component | Part Name | Role in the Project |
 |---|---|---|
 | Radar Sensor | HB100 (10.525 GHz) | Transmits microwave signals and senses returning movement |
@@ -148,7 +142,7 @@ After Simulating our Circuit on proteus , we built a prototype of our circuit on
   * **Vehicle / Metal:** Strong, sharp, and steady single-frequency peak.
   
 
-🪛 7. Hardware Integration & Pin Connections
+**7. Hardware Integration & Pin Connections**
 
 ### 🔋 Custom-Built LiPo Power Supply (5V)
 To keep the radar portable and free from electrical wall noise, we built a **custom-made Lithium-Polymer (LiPo) battery pack.
@@ -168,7 +162,7 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
 
 
   
-🧩 8. Main Circuit Modules
+**8. Main Circuit Modules**
 
 
 📡 1. HB100 Radar Sensor
@@ -208,7 +202,7 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
 
    
 
-📊 9. Machine Learning & ThingSpeak Dashboard:
+**9. Machine Learning & ThingSpeak Dashboard:**
 
 <p align="center">
   <img src="dashboard.png" alt="Radar Live Dashboard" width="85%">
@@ -243,7 +237,7 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
  * Lights up sectors brighter where stronger movement is detected, giving security guards an instant view of target directions.
 
 
-🌍 10. Real-Life Applications
+**10. Real-Life Applications**
 
 
  * All-Weather Perimeter Security: Works through dense fog, rain, snow, and total darkness where standard security cameras fail.
@@ -253,7 +247,7 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 
 
 
-🚀 11. Future Upgrades
+**11. Future Upgrades**
  * Direction Detection (Coming vs. Going): Use an I/Q radar sensor to determine whether an object is moving closer or farther away.
  * Distance Measurement: Upgrade to an FMCW-capable radar module to report both target distance and speed together.
  * Battery Power Optimization: Program the ESP32-S3 to sleep and only wake up when the LM311 detects movement, saving power for long-term battery setups.
@@ -283,7 +277,7 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 > 🟡 **In Progress** — Active development  
 > 🔵 **Planned** — Staged for next iteration
 
-## 🏁 12. Conclusion
+**12. Conclusion**
 
 This project successfully establishes a complete end-to-end foundation for an affordable, noise-resilient micro-Doppler radar system. 
 
@@ -296,10 +290,7 @@ Till now, we have achieved the following key milestones:
 Moving forward, rather than relying on synthetic or simulated inputs, our primary focus is collecting extensive real-world radar reflections directly from our hardware prototype. We will use this authentic experimental dataset to train and deploy our edge TinyML model, enabling precise, on-device classification of human movement, vehicles, and environmental clutter.
 
 
-
-
-
-## 📚 13. References
+**13. References**
 
 ### 📄 Hardware Datasheets
 * **HB100 Microwave Motion Sensor:** [Agilent / ST Electronics HB100 Engineering Datasheet](https://www.limpkin.fr/public/HB100/HB100_Microwave_Sensor_Module_Datasheet.pdf)
