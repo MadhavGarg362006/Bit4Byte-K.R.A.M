@@ -25,7 +25,7 @@
 - [13. References](#13-references)
 
 
-## 📌 2. Executive Summary
+##  2. Executive Summary
 
 This project builds an affordable, real-time radar monitoring system using an **HB100 microwave radar sensor** and an **ESP32-S3** microcontroller.
 
@@ -35,7 +35,7 @@ Target speeds and detection strengths are collected across a **360° area** (div
 
 ---
 
-## 🎯 3. Problem Statement
+##  3. Problem Statement
 
 ### ⚠️ The Challenge
 Most common motion detectors use PIR (infrared) sensors or optical video cameras:
@@ -96,7 +96,7 @@ The project works through a clear, sequential pipeline from microwave sensing to
  * Capacitors: 1 µF, 10 µF, 0.1 µF, 3.3 nF, 4.7 nF, 10 nF (used for blocking DC voltage and tuning the filter).
  * Resistors: 100 Ω, 220 Ω, 330 Ω, 1 kΩ, 4.7 kΩ, 10 kΩ, 68 kΩ (used for setting amplification levels).
 
-## 🔌 6. Circuit Explanation (Proteus Simulation)
+##  6. Circuit Explanation (Proteus Simulation)
 
 
 Before building the physical board, the circuit was designed and tested in Proteus to ensure clean signal output:
@@ -259,7 +259,7 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 
 
 
-## 📋 Project Status
+##  Project Status
 
 | Category | Task / Milestone | Status | Details |
 |---|---|:---:|---|
