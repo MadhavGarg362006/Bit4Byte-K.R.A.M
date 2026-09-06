@@ -255,11 +255,10 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
  * Direction Detection (Coming vs. Going): Use an I/Q radar sensor to determine whether an object is moving closer or farther away.
  * Distance Measurement: Upgrade to an FMCW-capable radar module to report both target distance and speed together.
  * Battery Power Optimization: Program the ESP32-S3 to sleep and only wake up when the LM311 detects movement, saving power for long-term battery setups.
- * Multiple Radars - 1 radar for every detection,this will help us in figuring the direction of the object and also will provide us with more accurate results.
-
-
-
-
+ * Multiple Radars - 1 radar for every detection,this will help us in figuring the direction of the object and also will provide us with more accurate results
+ * Adaptive Gain Control (AGC) Implement a Programmable Gain Amplifier (PGA) such as PGA112 to dynamically adjust receiver gain—high gain for distant targets and reduced gain for nearby targets.
+ * Advanced GUI & Signal Visualization Upgrade the interface with real-time FFT spectrum analysis and signal strength visualization.
+   
 
 ##  Project Status
 
