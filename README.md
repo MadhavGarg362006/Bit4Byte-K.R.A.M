@@ -116,6 +116,16 @@ Before building the physical board, the circuit was designed and tested in Prote
 
 
 
+After Simulating our Circuit on proteus , we built a prototype of our circuit on breadboard for testing the gain of IC 
+
+<p align="center">
+  <img src="breadboardckt.jpeg" alt="Breadboard Circuit Prototype" width="75%">
+  <br>
+  <em>Figure: Complete breadboard prototype of the analog conditioning chain</em>
+</p>
+
+
+
  * DC Blocking Capacitor (10 µF):
    * The HB100 output rides on a steady direct current (DC) voltage. This capacitor strips that steady voltage away and lets only the moving movement wave pass through.
   
