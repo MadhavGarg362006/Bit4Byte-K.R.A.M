@@ -1,4 +1,4 @@
-# (K.R.A.M) 
+# K.R.A.M
 Kinematic Radar & Activity Monitor 
 
 > A real-time radar system using the HB100 microwave sensor and ESP32-S3. It detects motion, calculates speed, filters unwanted electrical noise, sends data to the cloud using ThingSpeak, and displays moving targets on a live 360° web dashboard.
