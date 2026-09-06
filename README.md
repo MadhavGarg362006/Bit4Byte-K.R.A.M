@@ -101,6 +101,8 @@ The overall step-by-step path of the signal through the project:
  * Resistors: 100 Ω, 220 Ω, 330 Ω, 1 kΩ, 4.7 kΩ, 10 kΩ, 68 kΩ (used for setting amplification levels).
 
 >>🔌6. Circuit Explanation (Proteus Simulation)
+
+
 Before building the physical board, the circuit was designed and tested in Proteus to ensure clean signal output:
  HB100 Output ──► [DC Blocker] ──► [Stage 1: Boost] ──► [Stage 2: Filter] ──► [Stage 3: Comparator] ──► ESP32-S3
 
@@ -118,7 +120,12 @@ Before building the physical board, the circuit was designed and tested in Prote
  * Second Gain Stage (10× to 100× Boost):
    * Further amplifies the filtered wave to make it large enough (0 – 3.3V) for both the analog pin and the comparator.
  * LM311 Comparator Digitizer:
-   * Acts as an electronic switch. Whenever the analog wave crosses a set center line, it flips between 0V and 3.3V, turning the smooth sine wave into clean square pulses.
+   * Acts as an electronic switch. Whenever the analog wave crosses a set center line, it flips between 0V and 3.3V, turning the smooth sine wave into clean square pulses.The LM311 comparator turns the smooth analog wave into clean ON/OFF pulses. The ESP32-S3 counts these pulses to calculate target speed directly.
+* **Samples the Wave for AI:** At the same time, the ESP32-S3's ADC pin reads the smooth analog wave and runs an FFT (Fast Fourier Transform) to break down its frequency patterns.
+* **Classifies the Target:** A lightweight ML model identifies what is moving based on its wave pattern:
+  * **Noise:** Weak, random, erratic signal (ignored).
+  * **Human:** Uneven, spread-out pattern caused by swinging arms and legs.
+  * **Vehicle / Metal:** Strong, sharp, and steady single-frequency peak.
   
 
 🪛 7. Hardware Integration & Pin Connections
@@ -197,6 +204,8 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 
 
 🌍 10. Real-Life Applications
+
+
  * All-Weather Perimeter Security: Works through dense fog, rain, snow, and total darkness where standard security cameras fail.
  * Privacy-Friendly Smart Buildings: Detects if a person is in a room or if someone has fallen without placing invasive cameras in private areas.
  * Low-Cost Road Speed Checks: Automatically detects speeding vehicles in neighborhood zones or school areas.
@@ -212,17 +221,62 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 
 
 
-🏁 12. Conclusion
-
-This project builds an end-to-end radar detection system on a student-friendly budget. By combining the HB100 sensor with a custom 4th-order filter, an LM311 digitizer, an ESP32-S3, and ThingSpeak cloud telemetry, we achieved reliable speed measurement, noise rejection, and live 360° tracking without expensive enterprise radar hardware.
 
 
+## 📋 Project Status
 
-📚 13. References
+| Category | Task / Milestone | Status | Details |
+|---|---|:---:|---|
+| **Simulation** | Proteus Circuit Simulation | ✅ Completed | 4th-order BPF (70–2000 Hz) & LM311 digitizer validated |
+| **Power Stage** | Custom Dual-Rail LiPo Supply | ✅ Completed | 7805 (+5V) & 7905 (-5V) rails active to remove AC hum |
+| **Hardware** | Breadboard Prototyping  | ✅ Completed | Implemented our circuit on breadboard for testing
+| **Embedded** | Pulse Counting & Velocity Measurement | ✅ Completed | GPIO interrupt routines configured for speed calculation |
+| **Embedded** | ADC Continuous Sampling & 256-pt FFT | 🔵 Planned | Spectral analysis and peak tracking on ESP32-S3 |
+| **IoT / Cloud** | ThingSpeak API Telemetry |✅ Completed | 5-second interval multi-field data transmission |
+| **Frontend** | 360° Real-Time Web Dashboard | ✅ Completed | HTML5 Canvas | 36-sector sweep interface |
+| **Machine Learning** | Micro-Doppler Dataset Collection | ✅ completed | Capturing signal profiles for noise, humans, and vehicles |
+| **Machine Learning** | Model Training & Edge Classification | 🔵 InProgress | Feature extraction (FFT peaks, ZCR) for TinyML |
 
 
- * HB100 Microwave Motion Sensor Application Note, Agilent Technologies.
- * Introduction to Radar Systems, Merrill Skolnik.
- * LM311 Voltage Comparator Datasheet, Texas Instruments.
- * TL072 Low-Noise JFET Op-Amp Datasheet, Texas Instruments.
- * ESP32-S3 Technical Reference Manual, Espressif Systems.
+> **Legend:**  
+> ✅ **Completed** — Tested & verified  
+> 🟡 **In Progress** — Active development  
+> 🔵 **Planned** — Staged for next iteration
+
+## 🏁 12. Conclusion
+
+This project successfully establishes a complete end-to-end foundation for an affordable, noise-resilient micro-Doppler radar system. 
+
+Till now, we have achieved the following key milestones:
+* **Circuit Design & Simulation:** Validated the analog front-end in Proteus, including the 4th-order active bandpass filter and the LM311 comparator stage.
+* **Power Supply Implementation:** Built a dedicated dual-rail LiPo power supply using 7805 (+5V) and 7905 (-5V) regulators, completely eliminating 50 Hz AC power line noise.
+* **Hardware Prototyping:** Assembled the analog conditioning chain on a breadboard and verified signal integrity from the HB100 sensor.
+* **Cloud Telemetry & Dashboard:** Implemented ADC sampling routines on the ESP32-S3 to stream real-time radar data over Wi-Fi to ThingSpeak, driving an interactive 360° sweeping dashboard.
+
+Moving forward, rather than relying on synthetic or simulated inputs, our primary focus is collecting extensive real-world radar reflections directly from our hardware prototype. We will use this authentic experimental dataset to train and deploy our edge TinyML model, enabling precise, on-device classification of human movement, vehicles, and environmental clutter.
+
+
+
+
+
+## 📚 13. References
+
+### 📄 Hardware Datasheets
+* **HB100 Microwave Motion Sensor:** [Agilent / ST Electronics HB100 Engineering Datasheet](https://www.limpkin.fr/public/HB100/HB100_Microwave_Sensor_Module_Datasheet.pdf)
+* **LM311 High-Speed Voltage Comparator:** [Texas Instruments LM311 Differential Comparator Datasheet](https://www.ti.com/lit/ds/symlink/lm311.pdf)
+* **TL072 Low-Noise JFET-Input Op-Amp:** [Texas Instruments TL07xx Dual Operational Amplifiers](https://www.ti.com/lit/ds/symlink/tl072.pdf)
+* **LM741 General-Purpose Operational Amplifier:** [Texas Instruments LM741 Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/lm741.pdf)
+* **ESP32-S3 Microcontroller:** [Espressif Systems ESP32-S3 Series Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf)
+
+### 💻 Software, Embedded & ML Libraries
+* **ESP32 Core for Arduino:** [Espressif Systems Arduino-ESP32 Official Repository](https://github.com/espressif/arduino-esp32)
+* **Fast Fourier Transform (arduinoFFT):** [arduinoFFT Library by kosme (Real/Complex FFT on Microcontrollers)](https://github.com/kosme/arduinoFFT)
+* **ESP32 DSP Library (Alternative FFT Engine):** [Espressif esp-dsp Optimized Digital Signal Processing](https://github.com/espressif/esp-dsp)
+* **Servo Control (ESP32):** [ESP32Servo by Kevin Harrington (360° Azimuth Sweep Control)](https://github.com/madhephaestus/ESP32Servo)
+* **TinyML Engine:** [TensorFlow Lite for Microcontrollers (TFLite-Micro)](https://github.com/tensorflow/tflite-micro)
+* **ThingSpeak Communication:** [ThingSpeak Communication Library for Arduino & ESP32](https://github.com/mathworks/thingspeak-arduino)
+
+### 🛠️ Simulation & CAD Tools
+* **Proteus VSM Software:** [Labcenter Electronics Proteus Design Suite](https://www.labcenter.com/)
+* **Proteus Sensor & Component Models:** [The Engineering Projects Proteus Sensor Library Hub](https://www.theengineeringprojects.com/)
+*
