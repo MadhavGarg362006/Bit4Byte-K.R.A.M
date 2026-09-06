@@ -271,7 +271,10 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 | **IoT / Cloud** | ThingSpeak API Telemetry |✅ Completed | 5-second interval multi-field data transmission |
 | **Frontend** | 360° Real-Time Web Dashboard | ✅ Completed | HTML5 Canvas | 36-sector sweep interface |
 | **Machine Learning** | Micro-Doppler Dataset Collection | ✅ completed | Capturing signal profiles for noise, humans, and vehicles |
-| **Machine Learning** | Model Training & Edge Classification | 🔵 InProgress | Feature extraction (FFT peaks, ZCR) for TinyML |
+| **Machine Learning** | Model Training & Edge Classification | 🟡 InProgress | Feature extraction (FFT peaks, ZCR) for TinyML |
+| **Machine Learning** | Model Training & Edge Classification | 🟡 InProgress | Feature extraction (FFT peaks, ZCR) for TinyML |
+| **PCB Layout** | Make a manufacturable custom PCB board | 🟡 InProgress | Low noise portable radar PCB |
+| **PCB Manufacturing** | upload gerber files to robu and digikey for custom PCB | 🔵 Planned | 
 
 
 > **Legend:**  
