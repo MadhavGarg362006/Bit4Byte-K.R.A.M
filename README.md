@@ -196,10 +196,15 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
  * Converts the analog wave into clean square pulses for the ESP32-S3.
  * Uses built-in hysteresis (a small buffer zone around the switching threshold). This prevents the switch from chattering or double-triggering on tiny noise spikes.
 
+   
 
 📊 9. Machine Learning & ThingSpeak Dashboard:
 
-
+<p align="center">
+  <img src="dashboard.png" alt="Radar Live Dashboard" width="85%">
+  <br>
+  <em>Figure: 360° Real-time radar surveillance dashboard</em>
+</p>
 
 🤖 Machine Learning Approach (Object Classification)
 Instead of just measuring speed, the ESP32-S3 analyzes signal shapes to tell what caused the movement:
