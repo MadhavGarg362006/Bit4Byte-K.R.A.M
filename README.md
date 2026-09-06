@@ -56,6 +56,8 @@ Airports, warehouses, farms, and smart homes need security systems that do not t
 
 ## 4. System Architecture
 
+<img src="Images/Architechture_KRAM.jpeg" alt="Architechture" width="85%">
+
 The project works through a clear, sequential pipeline from microwave sensing to live cloud visualization:
 
 * **Step 1: Motion Detection (HB100 Sensor)**  
