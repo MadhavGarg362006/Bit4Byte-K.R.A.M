@@ -205,7 +205,7 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
 **9. Machine Learning & ThingSpeak Dashboard:**
 
 <p align="center">
-  <img src="dashboard.png" alt="Radar Live Dashboard" width="85%">
+  <img src="KRAMdashboard.png" alt="Radar Live Dashboard" width="85%">
   <br>
   <em>Figure: 360° Real-time radar surveillance dashboard</em>
 </p>
