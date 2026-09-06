@@ -106,7 +106,17 @@ The overall step-by-step path of the signal through the project:
 Before building the physical board, the circuit was designed and tested in Proteus to ensure clean signal output:
  HB100 Output ──► [DC Blocker] ──► [Stage 1: Boost] ──► [Stage 2: Filter] ──► [Stage 3: Comparator] ──► ESP32-S3
 
- * DC Blocking Capacitor (1 µF):
+
+
+ <p align="center">
+  <img src="proteuscircuit.jpeg" alt="Proteus Circuit Diagram" width="85%">
+  <br>
+  <em>Figure: Proteus simulation circuit for the 4th-order filter and LM311 stage</em>
+</p>
+
+
+
+ * DC Blocking Capacitor (10 µF):
    * The HB100 output rides on a steady direct current (DC) voltage. This capacitor strips that steady voltage away and lets only the moving movement wave pass through.
   
   
