@@ -298,7 +298,7 @@ Moving forward, rather than relying on synthetic or simulated inputs, our primar
 ## 13. References
 
 ### 📄 Hardware Datasheets
-* **HB100 Microwave Motion Sensor:** [Agilent / ST Electronics HB100 Engineering Datasheet](https://www.limpkin.fr/public/HB100/HB100_Microwave_Sensor_Module_Datasheet.pdf)
+* **HB100 Microwave Motion Sensor:** [Agilent / ST Electronics HB100 Engineering Datasheet](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6360/HB100.pdf)
 * **LM311 High-Speed Voltage Comparator:** [Texas Instruments LM311 Differential Comparator Datasheet](https://www.ti.com/lit/ds/symlink/lm311.pdf)
 * **TL072 Low-Noise JFET-Input Op-Amp:** [Texas Instruments TL07xx Dual Operational Amplifiers](https://www.ti.com/lit/ds/symlink/tl072.pdf)
 * **LM741 General-Purpose Operational Amplifier:** [Texas Instruments LM741 Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/lm741.pdf)
