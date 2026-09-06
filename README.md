@@ -299,7 +299,7 @@ Moving forward, rather than relying on synthetic or simulated inputs, our primar
 
 
 <img src="Images/KRAM_Final_Prototype.jpeg" alt="KRAM_Final_Prototype" width="85%">
-<img src="Images/PCB_Schematic.jpeg" alt="PCB_Schematic" width="85%">
+<img src="Images/PCB_Schematic.png" alt="PCB_Schematic" width="85%">
 <img src="Images/PCB_Layout.jpeg" alt="PCB_Layout" width="85%">
 
 
