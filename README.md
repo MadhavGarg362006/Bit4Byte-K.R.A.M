@@ -158,12 +158,11 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
 * *Why Dual Rails Matter:* Providing both +5V and -5V gives our TL072 op-amps a true symmetric supply with a solid $0\text{ V}$ center ground. This allows the micro-Doppler AC wave to swing cleanly above and below zero without distorting or clipping.
 
 
-| From (Component) | Pin Name | To (Component) | Pin Name | What it Does |
-|---|---|---|---|---|
-
-| HB100 Radar | IF Pin | Analog Filter Circuit | Input Capacitor | Sends the raw movement signal |
-| Filter Output | Op-Amp Output | ESP32-S3 | GPIO 1 (ADC Pin) | Reads smooth wave for ML / FFT |
-| LM311 Chip | Pin 7 (Output) | ESP32-S3 | GPIO 4 (Pulse Pin) | Reads digital pulses to count speed |
+| From (Component) | Pin Name         | To (Component)        | Pin Name           | What it Does                       |
+|:-----------------|:-----------------|:----------------------|:-------------------|:-----------------------------------|
+| HB100 Radar      | IF Pin           | Analog Filter Circuit | Input Capacitor    | Sends the raw movement signal      |
+| Filter Output    | Op-Amp Output    | ESP32-S3              | GPIO 1 (ADC Pin)   | Reads smooth wave for ML / FFT     |
+| LM311 Chip       | Pin 7 (Output)   | ESP32-S3              | GPIO 4 (Pulse Pin) | Reads digital pulses to count speed|
 
 
   
