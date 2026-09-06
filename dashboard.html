@@ -1,0 +1,325 @@
+#include <ESP32Servo.h>
+#include <WiFi.h>
+#include "ThingSpeak.h"
+
+const char* WIFI_SSID     = "Madhav";
+const char* WIFI_PASSWORD = "maddy123";
+
+unsigned long CHANNEL_ID    = 3465056;              
+const char*   WRITE_API_KEY = "B63WTDJZO89ARBBG"; 
+
+WiFiClient client;
+
+#define SERVO_PIN 4
+
+Servo radarServo;
+
+#define START_ANGLE 0
+#define END_ANGLE 360
+#define STEP_ANGLE 10
+
+const int NUM_SECTORS = 36;
+
+int sectorIntensity[NUM_SECTORS];
+float sectorFrequency[NUM_SECTORS];
+
+#define TARGET_CLEAR  0
+#define TARGET_HUMAN  1
+#define TARGET_DRONE  2
+#define TARGET_BIRD   3
+#define TARGET_CAR    4
+
+int activeClassPool[] = { TARGET_HUMAN };
+int numActiveClasses = 1;
+
+int   reportedClass = TARGET_CLEAR;
+float reportedSpeed = 0.0;
+
+int pickTargetClass() {
+  int idx = random(0, numActiveClasses);
+  return activeClassPool[idx];
+}
+
+float randomSpeedForClass(int classId) {
+  switch (classId) {
+    case TARGET_HUMAN: return random(10, 61)   / 10.0; 
+    case TARGET_DRONE: return random(100, 701) / 10.0; 
+    case TARGET_BIRD:  return random(150, 501) / 10.0; 
+    case TARGET_CAR:   return random(200, 1201)/ 10.0; 
+    default:           return 0.0;
+  }
+}
+
+String classNameFor(int classId) {
+  switch (classId) {
+    case TARGET_HUMAN: return "HUMAN";
+    case TARGET_DRONE: return "DRONE";
+    case TARGET_BIRD:  return "BIRD";
+    case TARGET_CAR:   return "CAR";
+    default:           return "CLEAR";
+  }
+}
+
+void setup() {
+
+  Serial.begin(115200);
+
+  randomSeed(micros());
+
+  radarServo.setPeriodHertz(50);
+  radarServo.attach(SERVO_PIN, 500, 2400);
+
+  WiFi.mode(WIFI_STA);
+  ThingSpeak.begin(client);
+  connectWiFi();
+
+  Serial.println();
+  Serial.println("=================================");
+  Serial.println("  360 DEGREE RADAR HEAT MAP TEST");
+  Serial.println("  RANDOM DATA SIMULATION");
+  Serial.println("=================================");
+}
+
+void connectWiFi() {
+  Serial.print("Connecting to WiFi");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nConnected. IP address: " + WiFi.localIP().toString());
+}
+
+void printBar(int intensity) {
+
+  int bars = map(intensity, 0, 100, 0, 20);
+
+  for (int i = 0; i < 20; i++) {
+    if (i < bars)
+      Serial.print("#");
+    else
+      Serial.print(".");
+  }
+}
+
+void printHeatMap() {
+
+  Serial.println();
+  Serial.println("========== 360 DEGREE HEAT MAP ==========");
+
+  for (int i = 0; i < NUM_SECTORS; i++) {
+
+    int angle = i * STEP_ANGLE;
+
+    Serial.print("Sector: ");
+    Serial.print(angle);
+    Serial.print(" deg | ");
+
+    Serial.print("Freq: ");
+    Serial.print(sectorFrequency[i], 1);
+    Serial.print(" Hz | ");
+
+    Serial.print("Intensity: ");
+    Serial.print(sectorIntensity[i]);
+    Serial.print("% | ");
+
+    printBar(sectorIntensity[i]);
+
+    Serial.println();
+  }
+
+  Serial.println("==========================================");
+}
+
+int randomTargetIntensity() {
+
+  int band = random(0, 3); 
+
+  if (band == 0) {
+    return random(20, 40);    
+  } else if (band == 1) {
+    return random(40, 70);    
+  } else {
+    return random(70, 101);   
+  }
+}
+
+void sendToThingSpeak() {
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected, skipping upload.");
+    return;
+  }
+
+  String intensityCSV = "";
+  float freqSum = 0;
+
+  for (int i = 0; i < NUM_SECTORS; i++) {
+    intensityCSV += String(sectorIntensity[i]);
+    if (i < NUM_SECTORS - 1) intensityCSV += ",";
+    freqSum += sectorFrequency[i];
+  }
+
+  float avgFrequency = freqSum / NUM_SECTORS;
+
+  ThingSpeak.setField(1, intensityCSV);
+  ThingSpeak.setField(2, avgFrequency);
+  ThingSpeak.setField(3, reportedClass);
+  ThingSpeak.setField(4, reportedSpeed);
+
+  int result = ThingSpeak.writeFields(CHANNEL_ID, WRITE_API_KEY);
+
+  if (result == 200) {
+    Serial.println("-> Scan uploaded to ThingSpeak.");
+  } else {
+    Serial.println("-> Upload failed, HTTP error code " + String(result));
+  }
+}
+
+void loop() {
+
+  Serial.println();
+  Serial.println("STARTING NEW 360 DEGREE SCAN...");
+  Serial.println();
+
+  int numberOfTargets = random(1, 3); 
+
+  int targetSector1 = random(0, NUM_SECTORS);
+  int target1Intensity = randomTargetIntensity();
+  int target1Class = pickTargetClass();
+  float target1Speed = randomSpeedForClass(target1Class);
+
+  int targetSector2 = -1;
+  int target2Intensity = 0;
+  int target2Class = TARGET_CLEAR;
+  float target2Speed = 0.0;
+
+  if (numberOfTargets == 2) {
+
+    targetSector2 = random(0, NUM_SECTORS);
+
+    while (abs(targetSector2 - targetSector1) < 4) {
+
+      targetSector2 = random(0, NUM_SECTORS);
+
+    }
+
+    target2Intensity = randomTargetIntensity();
+    target2Class = pickTargetClass();
+    target2Speed = randomSpeedForClass(target2Class);
+
+  }
+
+  if (target2Intensity > target1Intensity) {
+    reportedClass = target2Class;
+    reportedSpeed = target2Speed;
+  } else {
+    reportedClass = target1Class;
+    reportedSpeed = target1Speed;
+  }
+
+  Serial.println("FAKE TARGET LOCATIONS:");
+
+  Serial.print("Target 1: ");
+  Serial.print(targetSector1 * STEP_ANGLE);
+  Serial.println(" degrees");
+
+  if (numberOfTargets == 2) {
+
+    Serial.print("Target 2: ");
+    Serial.print(targetSector2 * STEP_ANGLE);
+    Serial.println(" degrees");
+
+  }
+
+  for (int i = 0; i < NUM_SECTORS; i++) {
+
+    int angle = i * STEP_ANGLE;
+
+    int servoAngle = angle % 180;
+
+    radarServo.write(servoAngle);
+
+    delay(100);
+
+    int intensity = random(0, 11);
+
+    float frequency = random(0, 100);
+
+    if (i == targetSector1) {
+
+      intensity = target1Intensity;
+
+      frequency = random(200, 2001);
+
+    }
+
+    else if (
+      i == targetSector1 - 1 ||
+      i == targetSector1 + 1
+    ) {
+
+      intensity = random(15, 35);
+
+      frequency = random(200, 800);
+
+    }
+
+    if (i == targetSector2) {
+
+      intensity = target2Intensity;
+
+      frequency = random(200, 2001);
+
+    }
+
+    else if (
+      i == targetSector2 - 1 ||
+      i == targetSector2 + 1
+    ) {
+
+      intensity = random(15, 35);
+
+      frequency = random(200, 800);
+
+    }
+
+    sectorIntensity[i] = intensity;
+
+    sectorFrequency[i] = frequency;
+
+    Serial.print("Scanning Sector: ");
+
+    Serial.print(angle);
+
+    Serial.print(" deg | Frequency: ");
+
+    Serial.print(frequency);
+
+    Serial.print(" Hz | Intensity: ");
+
+    Serial.print(intensity);
+
+    Serial.println("%");
+
+  }
+
+  printHeatMap();
+
+  Serial.println();
+  Serial.println("========== TARGET CLASSIFICATION ==========");
+  Serial.print("Classification: ");
+  Serial.println(classNameFor(reportedClass));
+  Serial.print("Estimated Speed: ");
+  Serial.print(reportedSpeed, 1);
+  Serial.println(" km/h");
+  Serial.println("============================================");
+
+  sendToThingSpeak();
+
+  Serial.println();
+  Serial.println("Next scan in 15 seconds...");
+
+  delay(15000);
+
+}
