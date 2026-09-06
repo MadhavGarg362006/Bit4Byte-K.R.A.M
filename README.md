@@ -10,18 +10,20 @@
 ---
 
 ## 📑 1. Table of Contents
-* [2. Executive Summary](#2-executive-summary)
-* [3. Problem Statement](#3-problem-statement)
-* [4. System Architecture](#4-system-architecture)
-* [5. Hardware Specifications](#5-hardware-specifications)
-* [6. Circuit Explanation (Proteus Simulation)](#6-circuit-explanation-proteus-simulation)
-* [7. Hardware Integration & Pin Connections](#7-hardware-integration--pin-connections)
-* [8. Main Circuit Modules](#8-main-circuit-modules)
-* [9. Machine Learning & ThingSpeak Dashboard](#9-machine-learning--thingspeak-dashboard)
-* [10. Real-Life Applications](#10-real-life-applications)
-* [11. Future Upgrades](#11-future-upgrades)
-* [12. Conclusion](#12-conclusion)
-* [13. References](#13-references)
+
+- [2. Executive Summary](#2-executive-summary)
+- [3. Problem Statement](#3-problem-statement)
+- [4. System Architecture](#4-system-architecture)
+- [5. Hardware Specifications](#5-hardware-specifications)
+- [6. Circuit Explanation (Proteus Simulation)](#6-circuit-explanation-proteus-simulation)
+- [7. Hardware Integration & Pin Connections](#7-hardware-integration--pin-connections)
+- [8. Main Circuit Modules](#8-main-circuit-modules)
+- [9. Machine Learning & ThingSpeak Dashboard](#9-machine-learning--thingspeak-dashboard)
+- [10. Real-Life Applications](#10-real-life-applications)
+- [11. Future Upgrades](#11-future-upgrades)
+- [12. Conclusion](#12-conclusion)
+- [13. References](#13-references)
+
 
 📌 2. Executive Summary
 
