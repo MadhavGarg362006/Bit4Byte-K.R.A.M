@@ -298,6 +298,11 @@ Till now, we have achieved the following key milestones:
 Moving forward, rather than relying on synthetic or simulated inputs, our primary focus is collecting extensive real-world radar reflections directly from our hardware prototype. We will use this authentic experimental dataset to train and deploy our edge TinyML model, enabling precise, on-device classification of human movement, vehicles, and environmental clutter.
 
 
+<img src="Images/KRAM_Final_Prototype.jpeg" alt="KRAM_Final_Prototype" width="85%">
+<img src="Images/PCB_Schematic.jpeg" alt="PCB_Schematic" width="85%">
+<img src="Images/PCB_Layout.jpeg" alt="PCB_Layout" width="85%">
+
+
 ## 13. References
 
 ### 📄 Hardware Datasheets
