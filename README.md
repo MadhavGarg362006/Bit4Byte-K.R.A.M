@@ -228,10 +228,15 @@ The ESP32-S3 connects to local Wi-Fi and updates ThingSpeak every 7 seconds:
 
 
 🏁 12. Conclusion
+This project successfully establishes a complete end-to-end foundation for an affordable, noise-resilient micro-Doppler radar system. 
 
-This project builds an end-to-end radar detection system on a student-friendly budget. By combining the HB100 sensor with a custom 4th-order filter, an LM311 digitizer, an ESP32-S3, and ThingSpeak cloud telemetry, we achieved reliable speed measurement, noise rejection, and live 360° tracking without expensive enterprise radar hardware.
+Till now, we have achieved the following key milestones:
+* **Circuit Design & Simulation:** Validated the analog front-end in Proteus, including the 4th-order active bandpass filter and the LM311 comparator stage.
+* **Power Supply Implementation:** Built a dedicated dual-rail LiPo power supply using 7805 (+5V) and 7905 (-5V) regulators, completely eliminating 50 Hz AC power line noise.
+* **Hardware Prototyping:** Assembled the analog conditioning chain on a breadboard and verified signal integrity from the HB100 sensor.
+* **Cloud Telemetry & Dashboard:** Implemented ADC sampling routines on the ESP32-S3 to stream real-time radar data over Wi-Fi to ThingSpeak, driving an interactive 360° sweeping dashboard.
 
-
+Moving forward, rather than relying on synthetic or simulated inputs, our primary focus is collecting extensive real-world radar reflections directly from our hardware prototype. We will use this authentic experimental dataset to train and deploy our edge TinyML model, enabling precise, on-device classification of human movement, vehicles, and environmental clutter.
 
 📚 13. References
 
