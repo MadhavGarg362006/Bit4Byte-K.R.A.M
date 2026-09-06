@@ -87,7 +87,7 @@ The project works through a clear, sequential pipeline from microwave sensing to
 |---|---|---|
 | Radar Sensor | HB100 (10.525 GHz) | Transmits microwave signals and senses returning movement |
 | Op-Amp ICs | TL072CP (x2) | Low-noise amplifiers that boost weak signals and cut noise |
-| Comparator IC | LM311 (x1 1) | Converts smooth analog waves into digital square pulses |
+| Comparator IC | LM311 (x1) | Converts smooth analog waves into digital square pulses |
 | Microcontroller | ESP32-S3 | Dual-core brain that counts pulses, runs math, and handles Wi-Fi |
 | Custom made LiPo Power Supply | 5V DC Regulator | Gives steady, clean electrical power without ripples |
 
