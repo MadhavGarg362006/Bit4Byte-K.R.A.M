@@ -165,6 +165,15 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
  * Keeps only frequencies between 70 Hz and 2000 Hz, matching the speeds of humans and vehicles while blocking out all other interference.
  * A "4th-order" filter has steep rejection walls, blocking unwanted noise much more effectively than a standard 1st- or 2nd-order filter.
 <p align="center">
+  <img src="FrontsideofPCB.png" alt="Frontside of PCB" width="75%">
+  <br>
+  <em>Figure: Frontside of PCB showing component layout</em>
+</p>
+
+
+
+
+<p align="center">
   <img src="Backsideofpcb.png" alt="Backside of PCB with LPF and HPF" width="75%">
   <br>
   <em>Figure: Backside of PCB showing LPF and HPF stages</em>
