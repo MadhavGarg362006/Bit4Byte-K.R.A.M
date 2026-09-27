@@ -209,7 +209,8 @@ Dual-Rail Voltage Regulation (7805 & 7905):*
 ## 9. Machine Learning & Telemetry Dashboard
 
 <p align="center">
-  <img src="Images/KRAM_dashboard.png" alt="Radar Live Dashboard" width="85%">
+  <img src="Images/K.R.A.M_Telemetry _Dashboard.png" alt="Radar Live Dashboard" width="85%">
+  <img src="Images/K.R.A.M_Benchmark_Dashboard.png" alt="Benchmark Dashboard" width="85%">
   <br>
   <em>Figure: 360° Real-time radar surveillance dashboard</em>
 </p>
